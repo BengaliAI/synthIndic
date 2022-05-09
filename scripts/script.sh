@@ -7,6 +7,6 @@ en_std="/home/ansary/WORK/Work/APSIS/datasets/SYNTH_INDIC/fonts/english/English.
 save_dir="/home/ansary/WORK/Work/APSIS/datasets/SYNTH_INDIC/datasets/"
 #-----------------------------------synthetic------------------------------------------
 python lang.py "bangla" "bn" $save_dir $bn_fonts $backs_dir $bn_std 
-python lang.py "english" "en" $save_dir $en_fonts $backs_dir $en_std
+python lang.py "english" "en" $save_dir $en_fonts $backs_dir $en_std --num_samples 20000
 #-----------------------------------synthetic------------------------------------------
 echo succeeded

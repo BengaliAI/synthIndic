@@ -47,11 +47,11 @@ def createFontImage(font,text):
     img=img[y_min:y_max,x_min:x_max]
     return img    
     
-def createRandomDictionary(valid_graphemes,num_samples):
+def createRandomDictionary(language,num_samples):
     '''
         creates a randomized dictionary
         args:
-            valid_graphemes :       list of graphemes that can be used to create a randomized dictionary 
+            language        :       language class that holds graphemes,numbers and puncts 
             num_samples     :       number of data to be created if no dictionary is provided       
         returns:
             a dictionary dataframe with "word" and "graphemes"
@@ -71,8 +71,13 @@ def createRandomDictionary(valid_graphemes,num_samples):
                         for _ in range(num_space):
                             _graphemes.append(" ")
                     _space_added=True
-            # grapheme
-            _graphemes.append(random.choice(valid_graphemes))
+            _ctype=random.choices(population=["g","n","p"],weights=text_conf.comp_weights,k=1)[0]
+            if _ctype=="g":    
+                _graphemes.append(random.choice(language.dict_graphemes))
+            elif _ctype=="n":    
+                _graphemes.append(random.choice(language.numbers))
+            else:
+                _graphemes.append(random.choice(language.punctuations))        
         graphemes.append(_graphemes)
         word.append("".join(_graphemes))
     df=pd.DataFrame({"word":word,"graphemes":graphemes})
@@ -126,11 +131,7 @@ def createSyntheticData(iden,
                         resources,
                         num_samples=100000,
                         comp_dim=64,
-                        use_all=True,
-                        use_only_graphemes=False,
-                        use_only_numbers=False,
-                        fname_offset=0,
-                        exclude_punct=False):
+                        fname_offset=0):
     '''
         creates: 
             * handwriten word image
@@ -151,18 +152,7 @@ def createSyntheticData(iden,
         csv=os.path.join(save_dir,"data.csv")
         txt=os.path.join(save_dir,"data.txt")
     
-    
-    if use_all:
-        valid_graphemes=language.graphemes
-    elif use_only_graphemes:
-        valid_graphemes=language.dict_graphemes
-    elif use_only_numbers:
-        valid_graphemes=language.numbers
-    if exclude_punct:
-        valid_graphemes=[grapheme for grapheme in valid_graphemes if grapheme not in language.punctuations]
-    
-    # save data
-    dictionary=createRandomDictionary(valid_graphemes,num_samples)
+    dictionary=createRandomDictionary(language,num_samples)
     # dataframe vars
     filepaths=[]
     words=[]

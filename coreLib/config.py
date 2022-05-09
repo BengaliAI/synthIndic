@@ -25,4 +25,5 @@ class text_conf:
     ext_weights           = [0.7,0.3]
     max_pad_perc          = 10
     min_pad_perc          = 1
+    comp_weights          = [0.7,0.2,0.1]
     
