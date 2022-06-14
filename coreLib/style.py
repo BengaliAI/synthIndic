@@ -12,19 +12,20 @@ from PIL import Image
 import math
 from .utils import randColor
 import blend_modes
+from .config import config
 
-
-BLENDS      =[blend_modes.soft_light,
-              blend_modes.lighten_only,
-              blend_modes.dodge,
-              blend_modes.addition,
+BLENDS      =[blend_modes.normal,
               blend_modes.darken_only,
               blend_modes.multiply,
               blend_modes.hard_light,
               blend_modes.difference,
               blend_modes.grain_extract,
-              blend_modes.grain_merge,
-              blend_modes.overlay]
+              blend_modes.soft_light,
+              blend_modes.lighten_only,
+              blend_modes.dodge,
+              blend_modes.addition,
+              blend_modes.overlay,
+              blend_modes.grain_merge]
 #----------------------------------------
 # back grounds
 #----------------------------------------
@@ -41,17 +42,6 @@ def get_scene_back(img,back_paths):
     back=back[y:y+hi,x:x+wi]
     return back
     
-def get_scene_cluttered_back(img,back_paths):
-    '''
-        creates scene background cluttered
-    '''
-    hi,wi=img.shape
-    back_path=random.choice(back_paths)
-    back=cv2.imread(back_path)
-    back=cv2.resize(back,(wi,hi))
-    return back
-
-
 def gaussian_noise(height, width):
     """
         Create a background with Gaussian noise (to mimic paper)
@@ -89,19 +79,23 @@ def quasicrystal(height, width):
     return np.array(image.convert("RGB"))
 
 def mono_back(height,width):
-    color_depth=random.randint(128,255)
-    back=np.ones((height,width,3))*color_depth
+    back=np.zeros((height,width,3))
+    back[:,:]=randColor()
     back=back.astype("uint8")
     return back
 
+op_dict_back={}
+op_dict_back["mono"]=mono_back
+op_dict_back["paper"]=gaussian_noise
+op_dict_back["crystal"]=quasicrystal
 
 def get_background(img,back_paths):
-    back_funct=random.choice(["scene","cluttered",mono_back,gaussian_noise,quasicrystal])
-    if back_funct=="scene":
+    
+    back_iden=random.choice(config.backs)
+    if back_iden=="scene":
         back=get_scene_back(img,back_paths)
-    elif back_funct=="cluttered":
-        back=get_scene_cluttered_back(img,back_paths)
     else:
+        back_funct=op_dict_back[back_iden]
         h,w=img.shape
         back=back_funct(h,w)
     return back
@@ -109,20 +103,20 @@ def get_background(img,back_paths):
 #----------------------------------------
 # create foreground
 #----------------------------------------
-def get_foreground(img,back_paths):
-    fore_type=random.choice(["scene","cluttered","mono"])
-    if fore_type=="scene":
-        fore=get_scene_back(img,back_paths)
-    elif fore_type=="cluttered":
-        fore=get_scene_cluttered_back(img,back_paths)
-    else:
+def get_foreground(img):
+    fore_type=random.choice(["mono","color"])
+    if fore_type=="color":
         h,w=img.shape
         fore=np.zeros((h,w,3))
         fore[:,:]=randColor()
+    else:
+        h,w=img.shape
+        fore=np.zeros((h,w,3))
+        fore[:,:]=randColor(col=False)
 
     img_r=255-img
     mask=cv2.merge((img_r,img_r,img_r))
-    fore=0.5*mask+0.5*fore
+    fore=0.1*mask+0.9*fore
     fore=fore.astype("uint8")
     fore[img==0]=(255,255,255)
     return fore
@@ -130,12 +124,6 @@ def get_foreground(img,back_paths):
 #----------------------------------------
 # blending utils
 #----------------------------------------
-def weighted_blend(back,fore):
-    bw=random.choice([0.1,0.2,0.3,0.4,0.5])
-    fw=1-bw
-    data=bw*back+fw*fore
-    return data.astype("uint8")
-
 def solid_blend(back,fore,mask):
     fore[mask==0]=back[mask==0]
     return fore
@@ -180,13 +168,11 @@ def check_visibility(image, mask):
     return total > 0 and count <= total * 0.1
 
 def get_blended_data(back,fore,mask):
-    ops=["solid","weighted"]+BLENDS
+    ops=["solid"]+BLENDS
     random.shuffle(ops)
     for op in ops:
         if op=="solid":
             data=solid_blend(back,fore,mask)
-        elif op=="weighted":
-            data=weighted_blend(back,fore)
         else:
             data=multi_blend(back,fore,op)
         if check_visibility(data,mask):

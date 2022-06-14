@@ -10,11 +10,7 @@ from termcolor import colored
 import os 
 import cv2 
 import numpy as np
-from tqdm import tqdm
 import random
-from PIL import Image
-import math
-from wand.image import Image as WImage
 #---------------------------------------------------------------
 def LOG_INFO(msg,mcolor='blue'):
     '''
@@ -47,12 +43,12 @@ def randColor(col=True,depth=64):
         d=random.randint(0,depth)
         return (d,d,d)
 
-def random_exec(poplutation=[0,1],weights=[0.7,0.3],match=0):
+def random_exec(poplutation=[0,1],weights=[0.5,0.5],match=0):
     return random.choices(population=poplutation,weights=weights,k=1)[0]==match
 #--------------------
 # processing 
 #--------------------
-def get_warped_image(img,warp_vec,coord,max_warp_perc):
+def get_warped_image(img,warp_vec,coord,xwarp,ywarp):
     '''
         returns warped image and new coords
         args:
@@ -69,10 +65,7 @@ def get_warped_image(img,warp_vec,coord,max_warp_perc):
     x2,y2=coord[1]
     x3,y3=coord[2]
     x4,y4=coord[3]
-    # warping calculation
-    xwarp=random.randint(0,max_warp_perc)/100
-    ywarp=random.randint(0,max_warp_perc)/100
-    # construct destination
+    
     dx=int(width*xwarp)
     dy=int(height*ywarp)
     # const
@@ -96,20 +89,19 @@ def warp_data(img,max_warp_perc):
         [width-1,0], 
         [width-1,height-1], 
         [0,height-1]]
-
-    # warp
-    for i in range(2):
-        if i==0:
-            idxs=[0,2]
-        else:
-            idxs=[1,3]
-        if random_exec():    
-            idx=random.choice(idxs)
-            img,coord=get_warped_image(img,warp_types[idx],coord,max_warp_perc)
+    w1type=warp_types[random.choice([0,2])]
+    w2type=warp_types[random.choice([1,3])]
+    # warping calculation
+    xwarp=random.randint(0,max_warp_perc)/100
+    ywarp=random.randint(0,max_warp_perc)/100
+    
+    img,coord=get_warped_image(img,w1type,coord,xwarp,ywarp)
+    img,coord=get_warped_image(img,w2type,coord,xwarp,ywarp)        
     return img
 
 
-def rotate_image(mat, angle_max=5):
+
+def rotate_image(mat,angle_max):
     """
         Rotates an image (angle in degrees) and expands image to avoid cropping
     """
@@ -135,27 +127,14 @@ def rotate_image(mat, angle_max=5):
     rotated_mat = cv2.warpAffine(mat, rotation_mat, (bound_w, bound_h),flags=cv2.INTER_NEAREST)
     return rotated_mat
 
-def curve_data(img,angle):
-    with WImage.from_array(img) as wimg:
-        wimg.virtual_pixel = 'black'
-        wimg.distort('arc',(angle,))
-        wimg=np.array(wimg)
-    return wimg
 
 def post_process_word_image(img,config):
-    # curve
-    if random_exec(weights=config.curve_exec_weights):
-        angle=random.randint(config.curve_angle_min,config.curve_angle_max)
-        img=curve_data(img,angle)
-        return img
     # warp 
-    if random_exec(weights=config.warping_exec_weights):
-        img=warp_data(img,config.warping_len_max_perc)
-        
+    if random_exec():
+        img=warp_data(img,config.warping_max)
     # rotate
-    if random_exec(weights=config.rotation_exec_weights):
-        img=rotate_image(img,angle_max=config.rotation_angle_max)
-        
+    if random_exec():
+        img=rotate_image(img,config.angle_max)
     return img
 
 #---------------------------------------------------------------
@@ -209,96 +188,6 @@ def padAllAround(img,pad_dim,pad_val,pad_single=None):
         # pad
         img =np.concatenate([left_pad,img,right_pad],axis=1)
     return img
-
-def padWordImage(img,pad_loc,pad_dim,pad_type,pad_val):
-    '''
-        pads an image with white value
-        args:
-            img     :       the image to pad
-            pad_loc :       (lr/tb) lr: left-right pad , tb=top_bottom pad
-            pad_dim :       the dimension to pad upto
-            pad_type:       central or left aligned pad
-            pad_val :       the value to pad 
-    '''
-    
-    if pad_loc=="lr":
-        # shape
-        h,w,d=img.shape
-        if pad_type=="central":
-            # pad widths
-            left_pad_width =(pad_dim-w)//2
-            # print(left_pad_width)
-            right_pad_width=pad_dim-w-left_pad_width
-            # pads
-            left_pad =np.ones((h,left_pad_width,3))*pad_val
-            right_pad=np.ones((h,right_pad_width,3))*pad_val
-            # pad
-            img =np.concatenate([left_pad,img,right_pad],axis=1)
-        else:
-            # pad widths
-            pad_width =pad_dim-w
-            # pads
-            pad =np.ones((h,pad_width,3))*pad_val
-            # pad
-            img =np.concatenate([img,pad],axis=1)
-    else:
-        # shape
-        h,w,d=img.shape
-        # pad heights
-        if h>= pad_dim:
-            return img 
-        else:
-            pad_height =pad_dim-h
-            # pads
-            pad =np.ones((pad_height,w,3))*pad_val
-            # pad
-            img =np.concatenate([img,pad],axis=0)
-    return img.astype("uint8")    
-
-def correctPadding(img,dim,ptype="left",pvalue=255):
-    '''
-        corrects an image padding 
-        args:
-            img     :       numpy array of single channel image
-            dim     :       tuple of desired img_height,img_width
-            ptype   :       type of padding (central,left)
-            pvalue  :       the value to pad
-        returns:
-            correctly padded image
-
-    '''
-    img_height,img_width=dim
-    mask=0
-    # check for pad
-    h,w,d=img.shape
-    
-    w_new=int(img_height* w/h) 
-    img=cv2.resize(img,(w_new,img_height),fx=0,fy=0, interpolation = cv2.INTER_NEAREST)
-    h,w,d=img.shape
-    if w > img_width:
-        # for larger width
-        h_new= int(img_width* h/w) 
-        img=cv2.resize(img,(img_width,h_new),fx=0,fy=0, interpolation = cv2.INTER_NEAREST)
-        # pad
-        img=padWordImage(img,
-                     pad_loc="tb",
-                     pad_dim=img_height,
-                     pad_type=ptype,
-                     pad_val=pvalue)
-        mask=img_width
-
-    elif w < img_width:
-        # pad
-        img=padWordImage(img,
-                    pad_loc="lr",
-                    pad_dim=img_width,
-                    pad_type=ptype,
-                    pad_val=pvalue)
-        mask=w
-    
-    # error avoid
-    img=cv2.resize(img,(img_width,img_height),fx=0,fy=0, interpolation = cv2.INTER_NEAREST)
-    return img,mask 
 #---------------------------------------------------------------
 # parsing utils
 #---------------------------------------------------------------

@@ -70,11 +70,10 @@ def addBrightness(image):
     return image_RGB
 
 AUGMENTATIONS=[additiveGaussian,
-              elasticDistortion,
               gaussianBlur,
               medianBlur,
               motionBlur]
 
-def get_augmented_data(img):
+def augment(img):
     op=random.choice(AUGMENTATIONS)
     return op(img)
