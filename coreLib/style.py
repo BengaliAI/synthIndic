@@ -34,13 +34,10 @@ def get_scene_back(img,back_paths):
         creates scene background 
     '''
     hi,wi=img.shape
-    while True:  
-        back_path=random.choice(back_paths)
-        back=cv2.imread(back_path)
-        hb,wb,_=back.shape
-        if wb-wi>0 and hb-hi>0:
-            break
-         
+    back_path=random.choice(back_paths)
+    back=cv2.imread(back_path)
+    hb,wb,_=back.shape
+    back=cv2.resize(back,(wb+wi,hb+hi))
     x=random.randint(0,wb-wi)
     y=random.randint(0,hb-hi)
     back=back[y:y+hi,x:x+wi]

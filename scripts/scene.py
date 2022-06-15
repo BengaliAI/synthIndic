@@ -94,7 +94,7 @@ if __name__=="__main__":
     parser.add_argument("backs_dir", help="Path of the folder that contains background images")
     parser.add_argument("dict_txt", help="Path of the dictionary txt to be used")
     
-    parser.add_argument("--num_process",required=False,default=24,help ="number of processes to be used:default=24")
+    parser.add_argument("--num_process",required=False,default=16,help ="number of processes to be used:default=16")
     parser.add_argument("--data_div",required=False,default=10000,help ="number of data to be used:default=10000")
     
     args = parser.parse_args()
