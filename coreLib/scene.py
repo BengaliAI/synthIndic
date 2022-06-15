@@ -17,7 +17,7 @@ import PIL.Image , PIL.ImageDraw , PIL.ImageFont
 from .style import get_background, get_blended_data, get_foreground 
 from .augmentation import augment
 from .config import config
-from .utils import create_dir,LOG_INFO,random_exec,post_process_word_image
+from .utils import LOG_INFO,post_process_word_image
 
 tqdm.pandas()
 
