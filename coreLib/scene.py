@@ -60,7 +60,7 @@ def create_single_image(word,font,resources):
     back=get_background(mask,resources.backs)
     fore=get_foreground(mask)
     image=get_blended_data(back,fore,mask)
-    image=augment(image,base=True)
+    image=augment(image)
     img_height=random.randint(config.min_dim,config.max_dim)
     h,w,_=image.shape
     w_new=int(img_height* w/h) 
@@ -73,21 +73,11 @@ def create_single_image(word,font,resources):
 # ops
 #--------------------
 def create_data(save_dir,dictionary,resources,comp_dim=64):
-    '''
-        creates: 
-            * handwriten word image
-            * fontspace word image
-            * a dataframe/csv that holds word level groundtruth
-    '''
-    #---------------
-    # processing
-    #---------------
     # save_paths
     class save:    
-        image=create_dir(save_dir,"image")
+        image=save_dir
         csv=os.path.join(save_dir,"data.csv")
-        txt=os.path.join(save_dir,"data.txt")
-    
+       
     filepaths=[]
     words=[]
     fiden=0
@@ -105,10 +95,8 @@ def create_data(save_dir,dictionary,resources,comp_dim=64):
             filepaths.append(os.path.join(save.image,fname))
             words.append(word)
             fiden+=1
-            with open(save.txt,"a+") as f:
-                f.write(f"{fiden}.png  {word}\n")
         except Exception as e:
            LOG_INFO(e)
-    
+
     df=pd.DataFrame({"filepath":filepaths,"word":words})
     df.to_csv(os.path.join(save.csv),index=False)

@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 debug.*
 unstable/*
+dicts/*.csv
+dicts/oscar/*.*
+dicts/*.txt

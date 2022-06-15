@@ -36,15 +36,15 @@ Gnome       : 3.36.8
 - [x] language : dict_grapheme from oscar corpus
     -   [x] lanuage agnostic
 - [x] utils: geometric operation: rotation,warp
-- [ ] ops: separate domain ops
-- [ ] scene: stablize scene generation
+- [x] ops: separate domain ops
+- [x] scene: stablize scene generation
 - [x] augmentation: reduce augmentations with hyper-params
 - [ ] paper: stablize paper generation
-- [ ] scripts/scene.py: 
-    - [ ] back dir
-    - [ ] font dir
-    - [ ] dictionary: complete
-        - [ ] carefull construction for coverage 
+- [x] scripts/scene.py: 
+    - [x] back dir
+    - [x] font dir
+    - [x] dictionary: complete
+        - [x] carefull construction for coverage 
 
 ```python
 # scene config
@@ -56,4 +56,26 @@ class config:
     min_dim          = 16
     backs            = ["scene","mono"] # paper,crystal
 # paper config
+```
+
+# Execution
+### Scene
+* change directory: ```cd scripts```
+* run ```scene.py```
+
+```python
+usage: SynthIndic recog Dataset Creating Script [-h] [--num_process NUM_PROCESS] [--data_div DATA_DIV] save_path fonts_dir backs_dir dict_txt
+
+positional arguments:
+  save_path             Path of the directory to save the dataset
+  fonts_dir             Path of the folder that contains fonts
+  backs_dir             Path of the folder that contains background images
+  dict_txt              Path of the dictionary txt to be used
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --num_process NUM_PROCESS
+                        number of processes to be used:default=24
+  --data_div DATA_DIV   number of data to be used:default=10000
+
 ```
