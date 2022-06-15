@@ -37,11 +37,16 @@ def get_scene_back(img,back_paths):
     back_path=random.choice(back_paths)
     back=cv2.imread(back_path)
     hb,wb,_=back.shape
-    back=cv2.resize(back,(wb+wi,hb+hi))
-    x=random.randint(0,wb-wi)
-    y=random.randint(0,hb-hi)
-    back=back[y:y+hi,x:x+wi]
-    return back
+    try:
+        x=random.randint(0,wb-wi)
+        y=random.randint(0,hb-hi)
+        back=back[y:y+hi,x:x+wi]
+        return back
+    except Exception as e:
+        back=cv2.resize(back,(wi,hi))
+        return back
+    
+
     
 def gaussian_noise(height, width):
     """
