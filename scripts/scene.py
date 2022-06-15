@@ -64,12 +64,12 @@ def main(args):
         for process in process_list:
             process.join()
     # ----------------------------------------------------------
-    # for i in tqdm(range(0,len(dicts),num_proc)):
-    #     start=i
-    #     end=start+num_proc
-    #     if end>len(dicts):
-    #         end=len(dicts)-1
-    #     run(start,end)
+    for i in tqdm(range(0,len(dicts),num_proc)):
+        start=i
+        end=start+num_proc
+        if end>len(dicts):
+            end=len(dicts)-1
+        run(start,end)
     # ----------------------------------------------------------
     # clean-up and merging
     csvs=[]
@@ -79,7 +79,7 @@ def main(args):
             csvs.append(csv)
     dfs=[pd.read_csv(csv) for csv in csvs]
     df=pd.concat(dfs,ignore_index=True)
-    df.to_csv(os.path.join(save_path,"data.csv"))
+    df.to_csv(os.path.join(save_path,"data.csv"),index=False)
     # temp files
     for csv in csvs:os.remove(csv)
         

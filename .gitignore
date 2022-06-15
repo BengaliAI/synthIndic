@@ -132,3 +132,4 @@ unstable/*
 dicts/*.csv
 dicts/oscar/*.*
 dicts/*.txt
+temp/*.png
