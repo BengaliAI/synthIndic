@@ -30,6 +30,10 @@ def main(args):
     temp_path   =   create_dir(save_path,"temp")
     
     df=pd.read_csv(data_csv)
+    print("total words:",len(df))
+    df["word"]=df["word"].progress_apply(lambda x: x if len(x)<pos_max-2 else None)
+    df.dropna(inplace=True)
+    print("filtered length words:",len(df))
     dfs=[df[idx:idx+split] for idx in range(0,len(df),split)]
     max_end=len(dfs)
 
