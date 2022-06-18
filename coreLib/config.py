@@ -4,8 +4,8 @@
 '''
 
 class config:
-    angle_max        = 5
-    warping_max      = 10
+    angle_max        = 2
+    warping_max      = 5
     mask_neg         = 30    
     max_dim          = 128
     min_dim          = 16
