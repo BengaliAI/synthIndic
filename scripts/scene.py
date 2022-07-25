@@ -64,6 +64,10 @@ def main(args):
         for process in process_list:
             process.join()
     # ----------------------------------------------------------
+    if len(dicts)<num_proc:
+        num_proc=len(dicts)
+    print("data division:",len(dicts))
+    print("concurrent process:",num_proc)
     for i in tqdm(range(0,len(dicts),num_proc)):
         start=i
         end=start+num_proc
