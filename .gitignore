@@ -133,3 +133,4 @@ dicts/*.csv
 dicts/oscar/*.*
 dicts/*.txt
 temp/*.png
+scripts/*.sh

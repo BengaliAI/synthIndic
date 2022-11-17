@@ -31,35 +31,8 @@ Gnome       : 3.36.8
 
 * **conda**: use environment.yml: ```conda env create -f environment.yml```
 
-# TODO
-- [x] clean ops to reduce time
-- [x] language : dict_grapheme from oscar corpus
-    -   [x] lanuage agnostic
-- [x] utils: geometric operation: rotation,warp
-- [x] ops: separate domain ops
-- [x] scene: stablize scene generation
-- [x] augmentation: reduce augmentations with hyper-params
-- [ ] paper: stablize paper generation
-- [x] scripts/scene.py: 
-    - [x] back dir
-    - [x] font dir
-    - [x] dictionary: complete
-        - [x] carefull construction for coverage 
-
-```python
-# scene config
-class config:
-    angle_max        = 5
-    warping_max      = 10
-    mask_neg         = 30    
-    max_dim          = 128
-    min_dim          = 16
-    backs            = ["scene","mono"] # paper,crystal
-# paper config
-```
 
 # Execution
-### Scene
 * change directory: ```cd scripts```
 * run ```scene.py```
 
